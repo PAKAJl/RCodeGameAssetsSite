@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 
 // ─── Types ──────────────────────────────────────────────
 type Tag =
@@ -57,7 +57,7 @@ const resources: Resource[] = [
     category: "3D Ассеты",
   },
   {
-    name: "Poly Pizza (бывш. Poly Haven)",
+    name: "Poly Pizza",
     url: "https://poly.pizza",
     description: "Бесплатные low-poly 3D модели, идеально подходящие для прототипирования и стилизованных игр.",
     tags: ["3D", "Модели"],
@@ -85,14 +85,14 @@ const resources: Resource[] = [
     category: "3D Ассеты",
   },
   {
-    name: "Ambientcg",
+    name: "AmbientCG",
     url: "https://ambientcg.com",
     description: "Высококачественные PBR материалы и текстуры, полностью бесплатные (CC0). HDRI карты окружения.",
     tags: ["3D", "Текстуры"],
     category: "3D Ассеты",
   },
   {
-    name: "Polyhaven",
+    name: "PolyHaven",
     url: "https://polyhaven.com",
     description: "Бесплатные HDRI, текстуры и 3D модели высокого качества. Всё под CC0 лицензией.",
     tags: ["3D", "Текстуры", "Модели"],
@@ -193,9 +193,9 @@ const resources: Resource[] = [
     category: "Инструменты и утилиты",
   },
   {
-    name: "Aseprite (trial) / LibreSprite",
+    name: "LibreSprite",
     url: "https://libresprite.github.io",
-    description: "Редактор пиксель-арта с мощной анимацией. LibreSprite — бесплатный форк Aseprite.",
+    description: "Редактор пиксель-арта с мощной анимацией. Бесплатный форк Aseprite.",
     tags: ["2D", "Спрайты", "Анимация", "Инструменты"],
     category: "Инструменты и утилиты",
   },
@@ -278,6 +278,13 @@ const resources: Resource[] = [
     tags: ["Construct", "Инструменты", "VFX"],
     category: "Construct ресурсы",
   },
+  {
+    name: "itch.io (Construct Assets)",
+    url: "https://itch.io/game-assets/tag-construct-2",
+    description: "Ассеты на itch.io специально для Construct 2/3. Шаблоны, спрайты, плагины и готовые проекты.",
+    tags: ["Construct", "2D", "Спрайты", "Инструменты"],
+    category: "Construct ресурсы",
+  },
   // Learning
   {
     name: "GDQuest",
@@ -301,15 +308,22 @@ const resources: Resource[] = [
     category: "Обучение",
   },
   {
-    name: "The Game Design Document (GDD) Template",
+    name: "GDD Template",
     url: "https://docs.google.com/document/d/1-I08qX76DgSFyN1ByIGtPuqXh7bVKraHcNIA25tpAzE",
     description: "Шаблон документа игрового дизайна. Поможет структурировать ваши идеи перед началом разработки.",
     tags: ["Инструменты", "Туториалы"],
     category: "Обучение",
   },
+  {
+    name: "itch.io (Game Jams)",
+    url: "https://itch.io/jams",
+    description: "Геймджемы на itch.io — лучший способ попрактиковаться и получить опыт в разработке игр.",
+    tags: ["Туториалы", "Инструменты"],
+    category: "Обучение",
+  },
 ];
 
-// ─── Icons (inline SVG) ─────────────────────────────────
+// ─── SVG Icons ──────────────────────────────────────────
 function SearchIcon({ className = "w-5 h-5" }: { className?: string }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -358,7 +372,15 @@ function XIcon({ className = "w-4 h-4" }: { className?: string }) {
   );
 }
 
-// ─── Tag color mapping ──────────────────────────────────
+function ArrowDownIcon({ className = "w-4 h-4" }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+    </svg>
+  );
+}
+
+// ─── Tag colors ─────────────────────────────────────────
 function getTagStyle(tag: Tag): string {
   const styles: Record<string, string> = {
     "3D": "bg-blue-500/20 text-blue-300 border-blue-500/30",
@@ -396,7 +418,7 @@ function getCategoryIcon(category: string): string {
   return icons[category] || "📦";
 }
 
-// ─── Components ─────────────────────────────────────────
+// ─── Navbar ─────────────────────────────────────────────
 function Navbar({ activeSection }: { activeSection: string }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const sections = [
@@ -406,7 +428,7 @@ function Navbar({ activeSection }: { activeSection: string }) {
   ];
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-slate-900/80 backdrop-blur-xl">
+    <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-slate-950/80 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
         <a href="#hero" className="flex items-center gap-2.5 group">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-lime-400 shadow-lg shadow-blue-500/20 transition-transform group-hover:scale-110">
@@ -418,7 +440,7 @@ function Navbar({ activeSection }: { activeSection: string }) {
           </span>
         </a>
 
-        {/* Desktop */}
+        {/* Desktop nav */}
         <div className="hidden items-center gap-1 sm:flex">
           {sections.map((s) => (
             <a
@@ -441,21 +463,21 @@ function Navbar({ activeSection }: { activeSection: string }) {
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label="Menu"
         >
-          <span className={`block h-0.5 w-6 bg-white transition-all ${mobileOpen ? "translate-y-2 rotate-45" : ""}`} />
-          <span className={`block h-0.5 w-6 bg-white transition-all ${mobileOpen ? "opacity-0" : ""}`} />
-          <span className={`block h-0.5 w-6 bg-white transition-all ${mobileOpen ? "-translate-y-2 -rotate-45" : ""}`} />
+          <span className={`block h-0.5 w-6 rounded bg-white transition-all duration-300 ${mobileOpen ? "translate-y-2 rotate-45" : ""}`} />
+          <span className={`block h-0.5 w-6 rounded bg-white transition-all duration-300 ${mobileOpen ? "opacity-0" : ""}`} />
+          <span className={`block h-0.5 w-6 rounded bg-white transition-all duration-300 ${mobileOpen ? "-translate-y-2 -rotate-45" : ""}`} />
         </button>
       </div>
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="border-t border-white/5 bg-slate-900/95 backdrop-blur-xl sm:hidden">
+        <div className="border-t border-white/5 bg-slate-950/95 backdrop-blur-xl sm:hidden">
           {sections.map((s) => (
             <a
               key={s.id}
               href={`#${s.id}`}
               onClick={() => setMobileOpen(false)}
-              className="block px-6 py-3 text-sm font-medium text-slate-300 hover:bg-white/5 hover:text-white"
+              className="block px-6 py-3 text-sm font-medium text-slate-300 hover:bg-white/5 hover:text-white transition-colors"
             >
               {s.label}
             </a>
@@ -466,6 +488,7 @@ function Navbar({ activeSection }: { activeSection: string }) {
   );
 }
 
+// ─── Hero ───────────────────────────────────────────────
 function HeroSection() {
   return (
     <section id="hero" className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 pt-16">
@@ -474,8 +497,15 @@ function HeroSection() {
         <div className="absolute top-1/4 left-1/4 h-96 w-96 rounded-full bg-blue-600/10 blur-[120px] animate-pulse-glow" />
         <div className="absolute bottom-1/4 right-1/4 h-96 w-96 rounded-full bg-lime-500/10 blur-[120px] animate-pulse-glow animation-delay-600" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[600px] w-[600px] rounded-full bg-blue-500/5 blur-[150px]" />
-        {/* Grid */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:60px_60px]" />
+        {/* Grid pattern */}
+        <div
+          className="absolute inset-0 opacity-30"
+          style={{
+            backgroundImage:
+              "linear-gradient(rgba(59,130,246,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(59,130,246,0.05) 1px, transparent 1px)",
+            backgroundSize: "60px 60px",
+          }}
+        />
       </div>
 
       <div className="relative z-10 mx-auto max-w-4xl text-center">
@@ -483,27 +513,28 @@ function HeroSection() {
           <span className="inline-block h-2 w-2 rounded-full bg-lime-400 animate-pulse" />
           Для учеников школы RCode
         </div>
+
         <h1 className="mb-6 text-4xl font-extrabold leading-tight tracking-tight text-white sm:text-6xl lg:text-7xl">
           Ресурсы для{" "}
           <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-lime-400 bg-clip-text text-transparent">
             игровой разработки
           </span>
         </h1>
+
         <p className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-slate-400 sm:text-xl">
           Коллекция лучших бесплатных ассетов, инструментов и учебных материалов
           для создания игр на <span className="text-blue-400 font-medium">Unity</span> и{" "}
           <span className="text-lime-400 font-medium">Construct 2</span>. Собрано специально для
           учеников школы программирования <span className="text-white font-semibold">RCode</span>.
         </p>
+
         <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
           <a
             href="#resources"
             className="group inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 px-8 py-3.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/25 transition-all hover:shadow-blue-500/40 hover:scale-105"
           >
             Смотреть ресурсы
-            <svg className="w-4 h-4 transition-transform group-hover:translate-y-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-            </svg>
+            <ArrowDownIcon className="w-4 h-4 transition-transform group-hover:translate-y-0.5" />
           </a>
           <a
             href="#about"
@@ -520,8 +551,8 @@ function HeroSection() {
             { n: `${CATEGORIES.length - 1}`, label: "Категорий" },
             { n: "100%", label: "Бесплатно" },
           ].map((s) => (
-            <div key={s.label} className="rounded-2xl border border-white/5 bg-white/[0.03] p-4 backdrop-blur">
-              <div className="text-2xl font-bold text-white sm:text-3xl">{s.n}</div>
+            <div key={s.label} className="rounded-2xl border border-white/5 bg-white/[0.03] p-4 backdrop-blur-sm">
+              <div className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-lime-400 bg-clip-text text-transparent sm:text-3xl">{s.n}</div>
               <div className="mt-1 text-xs text-slate-500 sm:text-sm">{s.label}</div>
             </div>
           ))}
@@ -531,6 +562,7 @@ function HeroSection() {
   );
 }
 
+// ─── Resource Card ──────────────────────────────────────
 function ResourceCard({ resource }: { resource: Resource }) {
   return (
     <a
@@ -543,7 +575,7 @@ function ResourceCard({ resource }: { resource: Resource }) {
         <h3 className="text-base font-semibold text-white transition-colors group-hover:text-blue-400 sm:text-lg">
           {resource.name}
         </h3>
-        <ExternalLinkIcon className="w-4 h-4 flex-shrink-0 text-slate-600 transition-colors group-hover:text-blue-400 mt-1" />
+        <ExternalLinkIcon className="w-4 h-4 shrink-0 text-slate-600 transition-colors group-hover:text-blue-400 mt-1" />
       </div>
       <p className="mb-4 flex-1 text-sm leading-relaxed text-slate-400">
         {resource.description}
@@ -562,6 +594,7 @@ function ResourceCard({ resource }: { resource: Resource }) {
   );
 }
 
+// ─── Resources Section ──────────────────────────────────
 function ResourcesSection() {
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("Все");
@@ -584,34 +617,40 @@ function ResourcesSection() {
     return resources.filter((r) => {
       const matchCategory = activeCategory === "Все" || r.category === activeCategory;
       const matchTags = activeTags.length === 0 || activeTags.every((t) => r.tags.includes(t));
+      const q = search.trim().toLowerCase();
       const matchSearch =
-        search.trim() === "" ||
-        r.name.toLowerCase().includes(search.toLowerCase()) ||
-        r.description.toLowerCase().includes(search.toLowerCase()) ||
-        r.tags.some((t) => t.toLowerCase().includes(search.toLowerCase()));
+        q === "" ||
+        r.name.toLowerCase().includes(q) ||
+        r.description.toLowerCase().includes(q) ||
+        r.tags.some((t) => t.toLowerCase().includes(q));
       return matchCategory && matchTags && matchSearch;
     });
   }, [search, activeCategory, activeTags]);
 
   const hasFilters = search !== "" || activeCategory !== "Все" || activeTags.length > 0;
-
   const visibleTags = showAllTags ? ALL_TAGS : ALL_TAGS.slice(0, 8);
 
   return (
     <section id="resources" className="relative px-4 py-24 sm:px-6">
-      <div className="mx-auto max-w-7xl">
+      {/* Subtle BG */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute top-0 right-1/4 h-64 w-64 rounded-full bg-blue-600/5 blur-[100px]" />
+        <div className="absolute bottom-0 left-1/4 h-64 w-64 rounded-full bg-lime-500/5 blur-[100px]" />
+      </div>
+
+      <div className="relative z-10 mx-auto max-w-7xl">
         {/* Heading */}
         <div className="mb-12 text-center">
           <h2 className="mb-4 text-3xl font-extrabold text-white sm:text-4xl">
             📦 Каталог ресурсов
           </h2>
           <p className="mx-auto max-w-2xl text-slate-400">
-            Используй поиск, категории и теги, чтобы найти нужные ассеты. 
+            Используй поиск, категории и теги, чтобы найти нужные ассеты.
             Все ресурсы бесплатные и проверенные преподавателями RCode.
           </p>
         </div>
 
-        {/* Search */}
+        {/* Search bar */}
         <div className="relative mx-auto mb-8 max-w-xl">
           <SearchIcon className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500" />
           <input
@@ -619,12 +658,12 @@ function ResourcesSection() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Поиск ресурсов..."
-            className="w-full rounded-xl border border-white/10 bg-white/5 py-3 pl-12 pr-4 text-sm text-white placeholder-slate-500 outline-none transition-all focus:border-blue-500/50 focus:bg-white/[0.07] focus:ring-2 focus:ring-blue-500/20"
+            className="w-full rounded-xl border border-white/10 bg-white/5 py-3 pl-12 pr-10 text-sm text-white placeholder-slate-500 outline-none transition-all focus:border-blue-500/50 focus:bg-white/[0.07] focus:ring-2 focus:ring-blue-500/20"
           />
           {search && (
             <button
               onClick={() => setSearch("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-500 hover:text-white"
+              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-500 hover:text-white transition-colors"
             >
               <XIcon className="w-4 h-4" />
             </button>
@@ -690,7 +729,7 @@ function ResourcesSection() {
           )}
         </div>
 
-        {/* Results */}
+        {/* Results grid */}
         {filtered.length > 0 ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((r) => (
@@ -717,22 +756,24 @@ function ResourcesSection() {
   );
 }
 
+// ─── About Section ──────────────────────────────────────
 function AboutSection() {
   return (
     <section id="about" className="relative px-4 py-24 sm:px-6">
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-blue-600/10 blur-[100px]" />
-        <div className="absolute top-0 right-1/3 h-72 w-72 rounded-full bg-lime-500/10 blur-[100px]" />
+        <div className="absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-blue-600/8 blur-[100px]" />
+        <div className="absolute top-0 right-1/3 h-72 w-72 rounded-full bg-lime-500/8 blur-[100px]" />
       </div>
       <div className="relative z-10 mx-auto max-w-4xl">
-        <div className="rounded-3xl border border-white/[0.06] bg-gradient-to-br from-white/[0.04] to-transparent p-8 backdrop-blur sm:p-12">
+        <div className="rounded-3xl border border-white/[0.06] bg-gradient-to-br from-white/[0.04] to-transparent p-8 backdrop-blur-sm sm:p-12">
           <div className="mb-8 flex items-center gap-4">
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-lime-400 shadow-lg shadow-blue-500/20">
               <GamepadIcon className="w-7 h-7 text-white" />
             </div>
             <div>
               <h2 className="text-2xl font-extrabold text-white sm:text-3xl">
-                Школа программирования <span className="bg-gradient-to-r from-blue-400 to-lime-400 bg-clip-text text-transparent">RCode</span>
+                Школа программирования{" "}
+                <span className="bg-gradient-to-r from-blue-400 to-lime-400 bg-clip-text text-transparent">RCode</span>
               </h2>
               <p className="text-sm text-slate-400">Создавай игры, которые покорят мир</p>
             </div>
@@ -741,7 +782,8 @@ function AboutSection() {
           <div className="space-y-4 text-slate-300 leading-relaxed">
             <p>
               <span className="font-semibold text-white">RCode</span> — это школа программирования, где мы учим создавать
-              настоящие игры с нуля. Наши ученики осваивают <span className="text-blue-400 font-medium">Unity</span>,{" "}
+              настоящие игры с нуля. Наши ученики осваивают{" "}
+              <span className="text-blue-400 font-medium">Unity</span>,{" "}
               <span className="text-lime-400 font-medium">Construct 2</span>, основы геймдизайна, работу с графикой и звуком.
             </p>
             <p>
@@ -758,7 +800,7 @@ function AboutSection() {
             ].map((item) => (
               <div
                 key={item.title}
-                className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4 text-center transition-all hover:bg-white/[0.06]"
+                className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4 text-center transition-all hover:bg-white/[0.06] hover:border-blue-500/20"
               >
                 <div className="mb-2 text-3xl">{item.icon}</div>
                 <h4 className="mb-1 text-sm font-semibold text-white">{item.title}</h4>
@@ -772,6 +814,7 @@ function AboutSection() {
   );
 }
 
+// ─── Footer ─────────────────────────────────────────────
 function Footer() {
   return (
     <footer className="border-t border-white/5 px-4 py-8 sm:px-6">
@@ -792,14 +835,20 @@ function Footer() {
   );
 }
 
+// ─── Scroll to Top ──────────────────────────────────────
 function ScrollToTop() {
   const [visible, setVisible] = useState(false);
-  if (typeof window !== "undefined") {
-    window.addEventListener("scroll", () => {
+
+  useEffect(() => {
+    const onScroll = () => {
       setVisible(window.scrollY > 500);
-    });
-  }
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   if (!visible) return null;
+
   return (
     <button
       onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
@@ -815,13 +864,13 @@ function ScrollToTop() {
 export default function App() {
   const [activeSection, setActiveSection] = useState("hero");
 
-  if (typeof window !== "undefined") {
+  useEffect(() => {
     let ticking = false;
-    window.addEventListener("scroll", () => {
+    const onScroll = () => {
       if (!ticking) {
         window.requestAnimationFrame(() => {
-          const sections = ["about", "resources", "hero"];
-          for (const id of sections) {
+          const sectionIds = ["about", "resources", "hero"];
+          for (const id of sectionIds) {
             const el = document.getElementById(id);
             if (el) {
               const rect = el.getBoundingClientRect();
@@ -835,8 +884,10 @@ export default function App() {
         });
         ticking = true;
       }
-    });
-  }
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
     <div className="min-h-screen bg-slate-950 text-white">
