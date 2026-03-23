@@ -422,9 +422,10 @@ function getCategoryIcon(category: string): string {
 function Navbar({ activeSection }: { activeSection: string }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const sections = [
-    { id: "hero", label: "Главная" },
-    { id: "resources", label: "Ресурсы" },
-    { id: "about", label: "О школе" },
+    { id: "https://forms.gle/ZoW8eDsaeALhxFKM9", label: "Обратная связь" },
+    { id: "#hero", label: "Главная" },
+    { id: "#resources", label: "Ресурсы" },
+    { id: "#about", label: "О школе" },
   ];
 
   return (
@@ -445,7 +446,7 @@ function Navbar({ activeSection }: { activeSection: string }) {
           {sections.map((s) => (
             <a
               key={s.id}
-              href={`#${s.id}`}
+              href={`${s.id}`}
               className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
                 activeSection === s.id
                   ? "bg-blue-500/15 text-blue-400"
